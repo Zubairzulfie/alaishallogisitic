@@ -2,145 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Travel Quote Generator</title>
+  <title>Dynamic Travel PDF Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
-    label { display: block; margin-top: 10px; }
-    input, select { padding: 5px; width: 100%; max-width: 300px; }
-    button { margin-top: 10px; padding: 8px 12px; }
-    .group-title { font-weight: bold; margin-top: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 960px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h2, h3 {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 4px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    .group {
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .btn {
+      margin: 10px 0;
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h1>Travel Quote Generator</h1>
-  <div class="section">
-    <label>Agent Name: <input id="agentName"></label>
-    <label>Agent Contact: <input id="agentContact"></label>
-  </div>
-  <div class="section">
-    <h2>Passenger Count</h2>
-    <label>Adults (ADT): <input type="number" id="adtCount" value="1"></label>
-    <label>Children (CNN): <input type="number" id="cnnCount" value="0"></label>
-    <label>Youths (YTH): <input type="number" id="ythCount" value="0"></label>
-    <label>Infants (INF): <input type="number" id="infCount" value="0"></label>
-  </div>
 
-  <div class="section" id="pnrsSection">
-    <h2>Flight Costs</h2>
-    <button onclick="addPNR()">+ Add PNR</button>
-  </div>
+<h2>Travel PDF Generator Form</h2>
 
-  <div class="section" id="hotelsSection">
-    <h2>Hotels</h2>
-    <button onclick="addHotel()">+ Add Hotel</button>
-  </div>
+<form id="pdfForm">
 
-  <div class="section" id="transfersSection">
-    <h2>Transfers</h2>
-    <button onclick="addTransfer()">+ Add Transfer</button>
-  </div>
+  <h3>Passenger Counts</h3>
+  <label>Adults (ADT):</label>
+  <input type="number" name="adt" min="0" value="0" required />
+  <label>Children (CNN):</label>
+  <input type="number" name="cnn" min="0" value="0" required />
+  <label>Youth (YTH):</label>
+  <input type="number" name="yth" min="0" value="0" required />
+  <label>Infants (INF):</label>
+  <input type="number" name="inf" min="0" value="0" required />
 
-  <div class="section">
-    <h2>Margin</h2>
-    <label>Margin Type:
-      <select id="marginType">
-        <option value="percent">Percent</option>
-        <option value="fixed">Fixed (£)</option>
-      </select>
-    </label>
-    <label>Margin Value: <input type="number" id="marginValue" value="10"></label>
-  </div>
+  <h3>Flight Costs (PNRs)</h3>
+  <div id="pnrSection"></div>
+  <button type="button" class="btn" onclick="addPNR()">+ Add Another PNR</button>
 
-  <button onclick="generatePDF()">Generate PDF</button>
+  <h3>Hotels</h3>
+  <div id="hotelSection"></div>
+  <button type="button" class="btn" onclick="addHotel()">+ Add Another Hotel</button>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let pnrCount = 0, hotelCount = 0, transferCount = 0;
+  <h3>Transfers</h3>
+  <div id="transferSection"></div>
+  <button type="button" class="btn" onclick="addTransfer()">+ Add Another Transfer</button>
 
-    function addPNR() {
-      const section = document.getElementById('pnrsSection');
-      pnrCount++;
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <div class="group-title">PNR ${pnrCount}</div>
-        <label>ADT Cost: <input type="number" class="pnr-adt"></label>
-        <label>CNN Cost: <input type="number" class="pnr-cnn"></label>
-        <label>YTH Cost: <input type="number" class="pnr-yth"></label>
-        <label>INF Cost: <input type="number" class="pnr-inf"></label>
-      `;
-      section.appendChild(div);
-    }
+  <h3>Margin</h3>
+  <label>Margin Type:</label>
+  <select name="marginType" required>
+    <option value="percent">Percentage (%)</option>
+    <option value="fixed">Fixed Amount (£)</option>
+  </select>
+  <label>Margin Value:</label>
+  <input type="number" step="0.01" name="marginValue" value="0" required />
 
-    function addHotel() {
-      const section = document.getElementById('hotelsSection');
-      hotelCount++;
-      const div = document.createElement('div');
-      div.innerHTML = `<label>Hotel ${hotelCount} Cost: <input type="number" class="hotel-cost"></label>`;
-      section.appendChild(div);
-    }
+  <h3>Company & Agent Details</h3>
+  <label>Company Name:</label>
+  <input type="text" name="companyName" required />
+  <label>Agent Name:</label>
+  <input type="text" name="agentName" required />
+  <label>Agent Phone:</label>
+  <input type="text" name="agentPhone" required />
+  <label>Agent Email:</label>
+  <input type="email" name="agentEmail" required />
 
-    function addTransfer() {
-      const section = document.getElementById('transfersSection');
-      transferCount++;
-      const div = document.createElement('div');
-      div.innerHTML = `<label>Transfer ${transferCount} Cost: <input type="number" class="transfer-cost"></label>`;
-      section.appendChild(div);
-    }
+  <h3>Uploads</h3>
+  <label>Flight Itinerary Image:</label>
+  <input type="file" name="flightImage" accept="image/*" required />
+  <label>Car Image (Transfer):</label>
+  <input type="file" name="carImage" accept="image/*" required />
 
-    function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+  <button type="submit" class="btn">Generate PDF</button>
+</form>
 
-      const adt = parseInt(document.getElementById('adtCount').value) || 0;
-      const cnn = parseInt(document.getElementById('cnnCount').value) || 0;
-      const yth = parseInt(document.getElementById('ythCount').value) || 0;
-      const inf = parseInt(document.getElementById('infCount').value) || 0;
+<script>
+let pnrCount = 0;
+let hotelCount = 0;
+let transferCount = 0;
 
-      const paxCount = adt + cnn + yth;
+function addPNR() {
+  pnrCount++;
+  const section = document.getElementById('pnrSection');
+  const div = document.createElement('div');
+  div.className = 'group';
+  div.innerHTML = `
+    <strong>PNR ${pnrCount}</strong>
+    <label>Adult Flight Cost (£):</label>
+    <input type="number" step="0.01" name="pnr${pnrCount}_adt" value="0" />
+    <label>Child Flight Cost (£):</label>
+    <input type="number" step="0.01" name="pnr${pnrCount}_cnn" value="0" />
+    <label>Youth Flight Cost (£):</label>
+    <input type="number" step="0.01" name="pnr${pnrCount}_yth" value="0" />
+    <label>Infant Flight Cost (£):</label>
+    <input type="number" step="0.01" name="pnr${pnrCount}_inf" value="0" />
+  `;
+  section.appendChild(div);
+}
 
-      const marginType = document.getElementById('marginType').value;
-      const marginValue = parseFloat(document.getElementById('marginValue').value) || 0;
+function addHotel() {
+  hotelCount++;
+  const section = document.getElementById('hotelSection');
+  const div = document.createElement('div');
+  div.className = 'group';
+  div.innerHTML = `
+    <strong>Hotel ${hotelCount}</strong>
+    <label>Hotel Name:</label>
+    <input type="text" name="hotel${hotelCount}_name" />
+    <label>Check-In Date:</label>
+    <input type="date" name="hotel${hotelCount}_checkin" />
+    <label>Check-Out Date:</label>
+    <input type="date" name="hotel${hotelCount}_checkout" />
+    <label>Nearby Attractions:</label>
+    <input type="text" name="hotel${hotelCount}_attractions" />
+  `;
+  section.appendChild(div);
+}
 
-      let hotelTransferTotal = 0;
-      document.querySelectorAll('.hotel-cost').forEach(i => hotelTransferTotal += parseFloat(i.value) || 0);
-      document.querySelectorAll('.transfer-cost').forEach(i => hotelTransferTotal += parseFloat(i.value) || 0);
+function addTransfer() {
+  transferCount++;
+  const section = document.getElementById('transferSection');
+  const div = document.createElement('div');
+  div.className = 'group';
+  div.innerHTML = `
+    <strong>Transfer ${transferCount}</strong>
+    <label>Number of PAX:</label>
+    <input type="number" name="transfer${transferCount}_pax" min="1" value="1" />
+    <label>Notes:</label>
+    <input type="text" name="transfer${transferCount}_notes" />
+  `;
+  section.appendChild(div);
+}
+</script>
 
-      const sharedCost = paxCount > 0 ? hotelTransferTotal / paxCount : 0;
-
-      let pnrADT = 0, pnrCNN = 0, pnrYTH = 0, pnrINF = 0;
-      document.querySelectorAll('.pnr-adt').forEach(i => pnrADT += parseFloat(i.value) || 0);
-      document.querySelectorAll('.pnr-cnn').forEach(i => pnrCNN += parseFloat(i.value) || 0);
-      document.querySelectorAll('.pnr-yth').forEach(i => pnrYTH += parseFloat(i.value) || 0);
-      document.querySelectorAll('.pnr-inf').forEach(i => pnrINF += parseFloat(i.value) || 0);
-
-      function applyMargin(value) {
-        return marginType === 'percent' ? value * (1 + marginValue / 100) : value + marginValue;
-      }
-
-      const totalADT = adt ? applyMargin(pnrADT) + sharedCost : 0;
-      const totalCNN = cnn ? applyMargin(pnrCNN) + sharedCost : 0;
-      const totalYTH = yth ? applyMargin(pnrYTH) + sharedCost : 0;
-      const totalINF = inf ? applyMargin(pnrINF) : 0;
-
-      doc.setFontSize(14);
-      doc.text("Travel Quote Summary", 10, 10);
-
-      doc.setFontSize(11);
-      doc.text(`Agent Name: ${document.getElementById('agentName').value}`, 10, 20);
-      doc.text(`Agent Contact: ${document.getElementById('agentContact').value}`, 10, 28);
-
-      doc.setFontSize(12);
-      doc.text("Total Price Per Person:", 10, 40);
-      doc.setFontSize(11);
-      doc.text(`Adult (ADT): £${totalADT.toFixed(2)}`, 10, 50);
-      doc.text(`Child (CNN): £${totalCNN.toFixed(2)}`, 10, 58);
-      doc.text(`Youth (YTH): £${totalYTH.toFixed(2)}`, 10, 66);
-      doc.text(`Infant (INF): £${totalINF.toFixed(2)}`, 10, 74);
-
-      doc.save("Travel_Quote.pdf");
-    }
-  </script>
 </body>
 </html>
