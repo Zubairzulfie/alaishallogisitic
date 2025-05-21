@@ -100,9 +100,6 @@
   <button type="submit" class="btn">Generate PDF</button>
 </form>
 
-<!-- jsPDF Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
 let pnrCount = 0;
 let hotelCount = 0;
@@ -160,77 +157,6 @@ function addTransfer() {
   `;
   section.appendChild(div);
 }
-
-document.getElementById('pdfForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = new FormData(this);
-
-  const adt = parseInt(form.get("adt") || 0);
-  const cnn = parseInt(form.get("cnn") || 0);
-  const yth = parseInt(form.get("yth") || 0);
-  const inf = parseInt(form.get("inf") || 0);
-
-  let totalCost = 0;
-  for (let i = 1; i <= pnrCount; i++) {
-    const a = parseFloat(form.get(`pnr${i}_adt`) || 0) * adt;
-    const c = parseFloat(form.get(`pnr${i}_cnn`) || 0) * cnn;
-    const y = parseFloat(form.get(`pnr${i}_yth`) || 0) * yth;
-    const f = parseFloat(form.get(`pnr${i}_inf`) || 0) * inf;
-    totalCost += a + c + y + f;
-  }
-
-  const marginType = form.get("marginType");
-  const marginValue = parseFloat(form.get("marginValue") || 0);
-  let finalTotal = totalCost;
-  if (marginType === "percent") {
-    finalTotal = totalCost * (1 + marginValue / 100);
-  } else {
-    finalTotal += marginValue;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text("Travel Summary", 10, 10);
-
-  doc.setFontSize(12);
-  doc.text(`Adults: ${adt}, Children: ${cnn}, Youth: ${yth}, Infants: ${inf}`, 10, 20);
-  doc.text(`Total Flight Cost Before Margin: £${totalCost.toFixed(2)}`, 10, 30);
-  doc.text(`Margin Applied (${marginType === "percent" ? marginValue + "%" : "£" + marginValue}):`, 10, 40);
-  doc.text(`Final Total: £${finalTotal.toFixed(2)}`, 10, 50);
-
-  let y = 60;
-  doc.text("Hotels:", 10, y);
-  for (let i = 1; i <= hotelCount; i++) {
-    y += 10;
-    doc.text(`Hotel ${i}: ${form.get(`hotel${i}_name`) || "N/A"}`, 10, y);
-    y += 6;
-    doc.text(`Check-in: ${form.get(`hotel${i}_checkin`) || "-"}, Check-out: ${form.get(`hotel${i}_checkout`) || "-"}`, 10, y);
-    y += 6;
-    doc.text(`Attractions: ${form.get(`hotel${i}_attractions`) || "-"}`, 10, y);
-  }
-
-  y += 10;
-  doc.text("Transfers:", 10, y);
-  for (let i = 1; i <= transferCount; i++) {
-    y += 10;
-    doc.text(`Transfer ${i}: ${form.get(`transfer${i}_pax`) || "N/A"} PAX`, 10, y);
-    y += 6;
-    doc.text(`Notes: ${form.get(`transfer${i}_notes`) || "-"}`, 10, y);
-  }
-
-  y += 10;
-  doc.text("Agent Info:", 10, y);
-  y += 6;
-  doc.text(`Company: ${form.get("companyName")}`, 10, y);
-  y += 6;
-  doc.text(`Agent: ${form.get("agentName")}, Phone: ${form.get("agentPhone")}`, 10, y);
-  y += 6;
-  doc.text(`Email: ${form.get("agentEmail")}`, 10, y);
-
-  doc.save("travel_summary.pdf");
-});
 </script>
 
 </body>
